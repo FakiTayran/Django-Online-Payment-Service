@@ -19,6 +19,10 @@ class Transaction(models.Model):
     receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_transactions')
     timestamp = models.DateTimeField(auto_now_add=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
+    exchange_currency = models.CharField(max_length=15, null=True, blank=True)  # exp => "USD => GBP"
+    exchange_rate = models.DecimalField(max_digits=10, decimal_places=6, default=1)
+    converted_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+
 
     def __str__(self):
         return f"{self.sender} to {self.receiver} - {self.amount} on {self.timestamp}"

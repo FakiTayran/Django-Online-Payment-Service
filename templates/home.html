@@ -5,6 +5,27 @@
 {% endblock %}
 
 {% block content %}
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+        <a class="navbar-brand" href="{% url 'webapp:my_home' %}">Dashboard</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="">
+                        Notifications
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'webapp:logout' %}">
+                        Logout
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
     <div class="container py-5">
         <h1>Welcome to your Dashboard</h1>
         <p>Your account balance: <strong>{{ user_balance }} - {{ user_currency }}</strong></p>
@@ -34,15 +55,21 @@
                     <th scope="col">Sender</th>
                     <th scope="col">Receiver</th>
                     <th scope="col">Amount</th>
+                    <th scope="col">Exchange Currency</th>
+                    <th scope="col">Exchange Rate</th>
+                    <th scope="col">Converted Amount</th>
                 </tr>
                 </thead>
                 <tbody>
                 {% for transaction in transactions %}
-                    <tr>
+                    <tr style="{% if transaction.sender == user %}color: red;{% else %}color: green;{% endif %}">
                         <td>{{ transaction.timestamp }}</td>
                         <td>{{ transaction.sender.username }}</td>
                         <td>{{ transaction.receiver.username }}</td>
-                        <td>${{ transaction.amount }}</td>
+                        <td>{{ transaction.amount }}</td>
+                        <td>{{ transaction.exchange_currency }}</td>
+                        <td>{{ transaction.exchange_rate }}</td>
+                        <td>{{ transaction.converted_amount }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>

@@ -8,6 +8,8 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 from  django.db import transaction
 from decimal import Decimal
+from django.db.models import Q
+
 
 import requests
 
@@ -34,7 +36,7 @@ def home(request):
     user_currency = request.user.currency
     logger.info(f"User balance: {user_balance}")
 
-    transactions = Transaction.objects.filter(sender=request.user).order_by('-timestamp')
+    transactions = Transaction.objects.filter(Q(sender=request.user) | Q(receiver=request.user)).order_by('-timestamp')
 
     context = {'user_balance': user_balance, 'user_currency':user_currency,'transactions': transactions}
     return render(request, 'home.html', context)
@@ -70,6 +72,8 @@ def sendMoney(request):
                         exchange_rate = None
                         logger.error("Failed to retrieve exchange rate.")
 
+                exchange_currency_format = f"{sender_currency} => {receiver_currency}"
+
                 if exchange_rate:
                     exchange_rate_decimal = Decimal(str(exchange_rate))
                     converted_amount = amount * exchange_rate_decimal
@@ -80,7 +84,7 @@ def sendMoney(request):
                         request.user.save()
                         receiver.save()
 
-                        Transaction.objects.create(sender=request.user, receiver=receiver, amount=amount)
+                        Transaction.objects.create(sender=request.user, receiver=receiver, amount=amount,exchange_currency = exchange_currency_format,exchange_rate=exchange_rate_decimal,converted_amount = converted_amount)
                         messages.success(request, 'Money sent successfully.')
                         logger.info(f"Money transfer successful: {amount} {sender_currency} from {request.user.username} to {receiver.username}")
                     else:
