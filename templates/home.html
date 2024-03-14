@@ -14,9 +14,9 @@
         <div class="collapse navbar-collapse" id="navbarContent">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="">
-                        Notifications
-                    </a>
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#notificationsModal">
+                        Notifications <span class="badge badge-danger">{{ notifications|length }}</span>
+                    </button>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'webapp:logout' %}">
@@ -26,6 +26,56 @@
             </ul>
         </div>
     </nav>
+
+    <!-- Modal -->
+    <div class="modal fade" id="notificationsModal" tabindex="-1" role="dialog" aria-labelledby="notificationsModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="notificationsModalLabel">Money Requests</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Requester</th>
+                            <th>Amount</th>
+                            <th>Currency</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for money_request in notifications %}
+                            <tr>
+                                <td>{{ money_request.requester.username }}</td>
+                                <td>{{ money_request.amount }}</td>
+                                <td>{{money_request.currency}}</td>
+                                <td>
+                                    <form action="{% url 'webapp:accept_request' money_request.id %}" method="post" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-success">Accept</button>
+                                    </form>
+                                    <form action="{% url 'webapp:deny_request' money_request.id %}" method="post" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger">Deny</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <div class="container py-5">
         <h1>Welcome to your Dashboard</h1>
         <p>Your account balance: <strong>{{ user_balance }} - {{ user_currency }}</strong></p>
@@ -76,4 +126,56 @@
             </table>
         </div>
     </div>
+    <div class="my-4">
+        <h2>Request Money</h2>
+        <form method="post" action="{% url 'webapp:request_money' %}">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="receiver" class="form-label">Receiver Username</label>
+                <input type="text" class="form-control" id="receiver" name="receiver" required>
+            </div>
+            <div class="mb-3">
+                <label for="amount" class="form-label">Amount</label>
+                <input type="number" step="0.01" class="form-control" id="amount" name="amount" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Send Request</button>
+        </form>
+    </div>
+    <div class="mt-4">
+        <h2>Your Money Requests</h2>
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">Time</th>
+                <th scope="col">Accepted</th>
+                <th scope="col">Completed</th>
+                <th scope="col">Receiver</th>
+                <th scope="col">Amount</th>
+                <th scope="col">Currency</th>
+
+            </tr>
+            </thead>
+            <tbody>
+            {% for sent_money_request in sent_money_requests %}
+                <tr>
+                    <td>{{ sent_money_request.timestamp }}</td>
+                    <td>{{ sent_money_request.accepted }}</td>
+                    <td>{{ sent_money_request.completed }}</td>
+                    <td>{{ sent_money_request.receiver }}</td>
+                    <td>{{ sent_money_request.amount }}</td>
+                    <td>{{ sent_money_request.currency }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        function handleMoneyRequests() {
+            $('#notificationsModal').modal('hide');
+        }
+       
+    </script>
 {% endblock %}

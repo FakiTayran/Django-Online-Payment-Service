@@ -23,6 +23,21 @@ class Transaction(models.Model):
     exchange_rate = models.DecimalField(max_digits=10, decimal_places=6, default=1)
     converted_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
+# models.py
+
+class RequestedMoney(models.Model):
+    requester = models.ForeignKey(User, on_delete=models.CASCADE, related_name='requested_money')
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_money')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    currency = models.CharField(max_length=3, default='GBP')
+    timestamp = models.DateTimeField(auto_now_add=True)
+    accepted = models.BooleanField(default=False)
+    completed = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.requester} requested {self.amount} from {self.receiver} on {self.timestamp}"
+
+
 
     def __str__(self):
         return f"{self.sender} to {self.receiver} - {self.amount} on {self.timestamp}"
