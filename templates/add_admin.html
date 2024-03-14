@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Create an Account
+{% endblock %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">Admin Dashboard</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'webapp:my_home' %}">
+                        Admin Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'webapp:logout' %}">
+                        Logout
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <h1>Register</h1>
+    <form method="post" class="form-group">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-success">Register</button>
+    </form>
+{% endblock %}

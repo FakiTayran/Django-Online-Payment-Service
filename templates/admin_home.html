@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Home Page
+{% endblock %}
+
+{% block content %}
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">Admin Dashboard</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'webapp:add_admin' %}">
+                        Add Admin
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'webapp:logout' %}">
+                        Logout
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div>
+        <div class="container py-5">
+            <h1>Welcome to your Admin Dashboard</h1>
+            <br>
+            <!-- Dropdown Menu for Users -->
+            <h3>Select User To View Transactions</h3>
+            <select id="user-dropdown" onchange="handleUserChange()" class="form-control" style="width: 300px;">
+                <option value="" selected disabled>Select a user</option>
+                <!-- User Options -->
+                {% for user in users %}
+                    <option value="{{ user.id }}">{{ user.username }} ({{ user.currency }})</option>
+                {% endfor %}
+            </select>
+
+            <!-- User Transactions Table (Initially Hidden) -->
+            <div id="user-transactions" style="display: none;">
+                <h2>User Transactions</h2>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Sender</th>
+                            <th>Receiver</th>
+                            <th>Amount</th>
+                            <th>Exchange Currency</th>
+                            <th>Converted Amount</th>
+                        </tr>
+                        </thead>
+                        <tbody id="user-transactions-body">
+                        <!-- User Transaction Rows Will Be Populated Here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function handleUserChange() {
+            var userId = document.getElementById('user-dropdown').value;
+            if (userId) {
+                fetch(`/webapp/get_user_transactions/${userId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        var userTransactionsBody = document.getElementById('user-transactions-body');
+                        userTransactionsBody.innerHTML = '';
+                        data.forEach(transaction => {
+                            var row = `<tr>
+                                <td>${transaction.timestamp}</td>
+                                <td>${transaction.sender}</td>
+                                <td>${transaction.receiver}</td>
+                                <td>${transaction.amount}</td>
+                                <td>${transaction.exchange_currency}</td>
+                                <td>${transaction.converted_amount}</td>
+                            </tr>`;
+                            userTransactionsBody.innerHTML += row;
+                        });
+                        document.getElementById('user-transactions').style.display = 'block';
+                    })
+                    .catch(error => {
+                        console.error('Error fetching user transactions:', error);
+                    });
+            } else {
+                // Hide user transactions table if no user selected
+                document.getElementById('user-transactions').style.display = 'none';
+            }
+        }
+    </script>
+
+{% endblock %}

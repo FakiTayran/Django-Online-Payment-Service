@@ -1,5 +1,6 @@
 # views.py
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -22,6 +23,12 @@ def home(request):
 
     if not isinstance(request.user, User):
         raise ValueError("request.user is not an instance of your custom User model.")
+
+    if request.user.is_superuser:
+        transactions = Transaction.objects.all().order_by('-timestamp')
+        users = User.objects.all()
+        context = {'transactions': transactions, 'users': users}
+        return render(request, 'admin_home.html',context)
 
     user_balance = request.user.balance
     user_currency = request.user.currency
@@ -194,6 +201,39 @@ def get_exchange_rate(base_currency, target_currency):
     except Exception as e:
         logger.exception(f"Error in get_exchange_rate: {str(e)}")
         return None
+
+
+def get_user_transactions(request, user_id):
+    if request.user.is_authenticated and request.user.is_superuser:
+        user = User.objects.filter(pk=user_id).first()
+        if user:
+            transactions = Transaction.objects.filter(Q(sender=user) | Q(receiver=user))
+            transaction_data = [{
+                'sender': transaction.sender.username,
+                'receiver': transaction.receiver.username,
+                'amount': transaction.amount,
+                'timestamp': transaction.timestamp,
+                'exchange_currency':transaction.exchange_currency,
+                'converted_amount':transaction.converted_amount
+            } for transaction in transactions]
+            return JsonResponse(transaction_data, safe=False)
+    return JsonResponse({'error': 'Unauthorized'}, status=403)
+
+def add_admin(request):
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.is_staff = True
+            user.is_superuser = True
+            user.save()
+            messages.success(request, 'Admin user created successfully.')
+            return redirect('webapp:my_home')
+        else:
+            messages.error(request, 'Error creating admin user.')
+    else:
+        form = RegisterForm()
+    return render(request, 'add_admin.html', {'form': form})
 
 def register_user(request):
     if request.method == "POST":
