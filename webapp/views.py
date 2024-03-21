@@ -147,7 +147,7 @@ def accept_request(request, request_id):
                 request.user.save()
                 sender.save()
 
-                Transaction.objects.create(sender=sender, receiver=request.user, amount=amount,
+                Transaction.objects.create(sender=request.user, receiver=sender, amount=amount,
                                                exchange_currency=f"{sender.currency} => {request.user.currency}",
                                                exchange_rate=exchange_rate, converted_amount=converted_amount)
 
