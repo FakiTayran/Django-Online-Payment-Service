@@ -57,6 +57,8 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+X_FRAME_OPTIONS = 'DENY'
+
 ROOT_URLCONF = "webapps2024.urls"
 
 TEMPLATES = [
@@ -157,5 +159,5 @@ LOGGING = {
 
 SECURE_SSL_REDIRECT = False
 SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = True
 
