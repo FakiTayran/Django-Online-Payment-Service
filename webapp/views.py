@@ -77,7 +77,7 @@ def send_money(request):
                                                    exchange_currency=exchange_currency_format,
                                                    exchange_rate=exchange_rate, converted_amount=converted_amount
                                                    ,timestamp=getTimeStampFromThrift())
-                        messages.success(request, 'Money sent successfully.')ç
+                        messages.success(request, 'Money sent successfully.')
                         logger.info(
                             f"Money transfer successful: {amount} {sender_currency} from {request.user.username} to {receiver.username}")
                     else:
