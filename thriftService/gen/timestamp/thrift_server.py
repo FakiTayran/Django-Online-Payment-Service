@@ -4,7 +4,11 @@ from thrift.transport import TSocket
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.server import TServer
-import TimestampService
+import sys
+sys.path.append("/Users/fakitayranariduru/IdeaProjects/webapps2024/")
+sys.path.append("thriftService/gen/timestamp")
+
+from thriftService.gen.timestamp import TimestampService
 from timestamp_handler import TimestampHandler
 
 def main():

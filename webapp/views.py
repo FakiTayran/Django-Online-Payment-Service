@@ -1,8 +1,6 @@
 # views.py
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.contrib.auth.forms import AuthenticationForm
-from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
@@ -16,8 +14,9 @@ import requests
 import logging
 from thrift.transport import TSocket
 from thrift.transport import TTransport
-from thriftService import *
 from thrift.protocol import TBinaryProtocol
+from thriftService.gen.timestamp import TimestampService
+
 
 
 
@@ -77,8 +76,8 @@ def send_money(request):
                         Transaction.objects.create(sender=request.user, receiver=receiver, amount=amount,
                                                    exchange_currency=exchange_currency_format,
                                                    exchange_rate=exchange_rate, converted_amount=converted_amount
-                                                   ,datetime=getTimeStampFromThrift())
-                        messages.success(request, 'Money sent successfully.')
+                                                   ,timestamp=getTimeStampFromThrift())
+                        messages.success(request, 'Money sent successfully.')ç
                         logger.info(
                             f"Money transfer successful: {amount} {sender_currency} from {request.user.username} to {receiver.username}")
                     else:
@@ -103,8 +102,9 @@ def send_money(request):
     context = {'form': form, 'transactions': transactions}
     return render(request, 'home.html', context)
 
-def getTimeStampFromThrift(self, *args, **kwargs):
+def getTimeStampFromThrift():
     # Thrift request creation
+
     transport = TSocket.TSocket('localhost', 10000)
     transport = TTransport.TBufferedTransport(transport)
     protocol = TBinaryProtocol.TBinaryProtocol(transport)
@@ -115,9 +115,8 @@ def getTimeStampFromThrift(self, *args, **kwargs):
     thrift_timestamp = client.getCurrentTimestamp()
     transport.close()
 
-    self.timestamp = thrift_timestamp
-
-    return self.timestamp
+    print(thrift_timestamp)
+    return thrift_timestamp
 
 @login_required
 def request_money(request):
