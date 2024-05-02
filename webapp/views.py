@@ -14,6 +14,12 @@ from .forms import RegisterForm, LoginForm, SendMoneyForm, RequestedMoneyForm
 import requests
 
 import logging
+from thrift.transport import TSocket
+from thrift.transport import TTransport
+from thriftService import *
+from thrift.protocol import TBinaryProtocol
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +76,8 @@ def send_money(request):
 
                         Transaction.objects.create(sender=request.user, receiver=receiver, amount=amount,
                                                    exchange_currency=exchange_currency_format,
-                                                   exchange_rate=exchange_rate, converted_amount=converted_amount)
+                                                   exchange_rate=exchange_rate, converted_amount=converted_amount
+                                                   ,datetime=getTimeStampFromThrift())
                         messages.success(request, 'Money sent successfully.')
                         logger.info(
                             f"Money transfer successful: {amount} {sender_currency} from {request.user.username} to {receiver.username}")
@@ -96,6 +103,21 @@ def send_money(request):
     context = {'form': form, 'transactions': transactions}
     return render(request, 'home.html', context)
 
+def getTimeStampFromThrift(self, *args, **kwargs):
+    # Thrift request creation
+    transport = TSocket.TSocket('localhost', 10000)
+    transport = TTransport.TBufferedTransport(transport)
+    protocol = TBinaryProtocol.TBinaryProtocol(transport)
+    client = TimestampService.Client(protocol)
+
+    # ThriftService getting TimeStamp.
+    transport.open()
+    thrift_timestamp = client.getCurrentTimestamp()
+    transport.close()
+
+    self.timestamp = thrift_timestamp
+
+    return self.timestamp
 
 @login_required
 def request_money(request):

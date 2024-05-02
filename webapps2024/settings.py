@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     'django.contrib.postgres',
     'crispy_forms',
-    "webapp.apps.WebappConfig"
+    "webapp.apps.WebappConfig",
+    "django_extensions"
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
@@ -153,3 +154,8 @@ LOGGING = {
         },
     },
 }
+
+SECURE_SSL_REDIRECT = False
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+

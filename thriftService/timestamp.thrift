@@ -1,0 +1,4 @@
+service TimestampService {
+    string getCurrentTimestamp();
+}
+
